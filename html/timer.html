@@ -35,18 +35,18 @@
 
     <!-- JavaScript -->
     <script>
+        // Get the target date from localStorage or set a new target date if it doesn't exist
+        var target_mili_sec = localStorage.getItem('target_mili_sec');
+        if (!target_mili_sec) {
+            // Set the target date 60 days from the current date
+            var targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + 60);
+            target_mili_sec = targetDate.getTime();
+            localStorage.setItem('target_mili_sec', target_mili_sec);
+        }
+
         // Function to update timer
         function timer() {
-            // Get the target date from localStorage or set a new target date if it doesn't exist
-            var target_mili_sec = localStorage.getItem('target_mili_sec');
-            if (!target_mili_sec) {
-                // Set the target date 60 days from the current date
-                var targetDate = new Date();
-                targetDate.setDate(targetDate.getDate() + 60);
-                target_mili_sec = targetDate.getTime();
-                localStorage.setItem('target_mili_sec', target_mili_sec);
-            }
-
             var now_mili_sec = new Date().getTime();
             var remaining_sec = Math.floor((target_mili_sec - now_mili_sec) / 1000);
 
