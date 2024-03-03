@@ -32,70 +32,51 @@
             </div>
         </div>
 
-        <!-- Form for setting the target date -->
-        <form id="targetDateForm">
-            <label for="targetDate">Set Target Date:</label>
-            <input type="datetime-local" id="targetDate" name="targetDate" required>
-            <button type="submit">Set</button>
-        </form>
+        <!-- JavaScript -->
+        <script>
+            // Function to fetch the target date from the server
+            function fetchTargetDate() {
+                fetch('/target-date')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.targetDate) {
+                            // Convert target date string to Date object
+                            const targetDate = new Date(data.targetDate);
+                            // Calculate time difference between current time and target date
+                            const timeDifference = targetDate.getTime() - Date.now();
+                            // Update the timer display
+                            updateTimer(timeDifference);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching target date:', error));
+            }
 
-        <!-- Button for retrieving the target date -->
-        <button id="retrieveTargetDate">Retrieve Target Date</button>
+            // Function to update the timer display
+            function updateTimer(timeDifference) {
+                const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+                document.getElementById('day').innerHTML = formatTime(days);
+                document.getElementById('hour').innerHTML = formatTime(hours);
+                document.getElementById('min').innerHTML = formatTime(minutes);
+                document.getElementById('sec').innerHTML = formatTime(seconds);
+            }
+
+            // Function to add leading zeros to single-digit numbers
+            function formatTime(time) {
+                return time < 10 ? '0' + time : time;
+            }
+
+            // Fetch the target date when the page loads
+            fetchTargetDate();
+
+            // Set an interval to update the timer periodically
+            setInterval(fetchTargetDate, 1000);
+        </script>
+
     </div>
-
-    <!-- JavaScript -->
-    <script>
-        // Function to fetch the target date from the server
-        function fetchTargetDate() {
-            fetch('/target-date')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.targetDate) {
-                        document.getElementById('targetDate').value = data.targetDate.slice(0, -1);
-                    }
-                })
-                .catch(error => console.error('Error fetching target date:', error));
-        }
-
-        // Function to update the target date on the server
-        function updateTargetDate(newTargetDate) {
-            fetch('/target-date', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ newTargetDate })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('Target date updated successfully');
-                }
-            })
-            .catch(error => console.error('Error updating target date:', error));
-        }
-
-        // Event listener for the form submission
-        document.getElementById('targetDateForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const newTargetDate = document.getElementById('targetDate').value;
-            updateTargetDate(newTargetDate);
-        });
-
-        // Event listener for retrieving the target date
-        document.getElementById('retrieveTargetDate').addEventListener('click', fetchTargetDate);
-
-        // Function to update the timer
-        function updateTimer() {
-            // Your existing timer update logic here...
-        }
-
-        // Set an interval to update the timer periodically
-        setInterval(updateTimer, 1000);
-        
-        // Fetch the target date when the page loads
-        fetchTargetDate();
-    </script>
 
 </body>
 </html>
