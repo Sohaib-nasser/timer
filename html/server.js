@@ -21,6 +21,16 @@ app.get('/target-date', (req, res) => {
     res.json({ targetDate });
 });
 
+// Calculate target date 60 days from now
+function calculateTargetDate() {
+    const now = new Date();
+    now.setDate(now.getDate() + 60);
+    return now;
+}
+
+// Set the initial target date when the server starts
+targetDate = calculateTargetDate();
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
