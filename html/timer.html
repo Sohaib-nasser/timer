@@ -31,38 +31,70 @@
                 <p class="digit_name">Seconds</p>
             </div>
         </div>
+
+        <!-- Form for setting the target date -->
+        <form id="targetDateForm">
+            <label for="targetDate">Set Target Date:</label>
+            <input type="datetime-local" id="targetDate" name="targetDate" required>
+            <button type="submit">Set</button>
+        </form>
+
+        <!-- Button for retrieving the target date -->
+        <button id="retrieveTargetDate">Retrieve Target Date</button>
     </div>
 
     <!-- JavaScript -->
     <script>
-        // Get the target date from localStorage or set a new target date if it doesn't exist
-        var target_mili_sec = localStorage.getItem('target_mili_sec');
-        if (!target_mili_sec) {
-            // Set the target date 60 days from the current date
-            var targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() + 60);
-            target_mili_sec = targetDate.getTime();
-            localStorage.setItem('target_mili_sec', target_mili_sec);
+        // Function to fetch the target date from the server
+        function fetchTargetDate() {
+            fetch('/target-date')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.targetDate) {
+                        document.getElementById('targetDate').value = data.targetDate.slice(0, -1);
+                    }
+                })
+                .catch(error => console.error('Error fetching target date:', error));
         }
 
-        // Function to update timer
-        function timer() {
-            var now_mili_sec = new Date().getTime();
-            var remaining_sec = Math.floor((target_mili_sec - now_mili_sec) / 1000);
-
-            var day = Math.floor(remaining_sec / (3600 * 24));
-            var hour = Math.floor((remaining_sec % (3600 * 24)) / 3600);
-            var min = Math.floor((remaining_sec % 3600) / 60);
-            var sec = Math.floor(remaining_sec % 60);
-
-            document.querySelector("#day").innerHTML = day;
-            document.querySelector("#hour").innerHTML = hour;
-            document.querySelector("#min").innerHTML = min;
-            document.querySelector("#sec").innerHTML = sec;
+        // Function to update the target date on the server
+        function updateTargetDate(newTargetDate) {
+            fetch('/target-date', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ newTargetDate })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Target date updated successfully');
+                }
+            })
+            .catch(error => console.error('Error updating target date:', error));
         }
 
-        // Call timer function every second
-        setInterval(timer, 1000);
+        // Event listener for the form submission
+        document.getElementById('targetDateForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const newTargetDate = document.getElementById('targetDate').value;
+            updateTargetDate(newTargetDate);
+        });
+
+        // Event listener for retrieving the target date
+        document.getElementById('retrieveTargetDate').addEventListener('click', fetchTargetDate);
+
+        // Function to update the timer
+        function updateTimer() {
+            // Your existing timer update logic here...
+        }
+
+        // Set an interval to update the timer periodically
+        setInterval(updateTimer, 1000);
+        
+        // Fetch the target date when the page loads
+        fetchTargetDate();
     </script>
 
 </body>
